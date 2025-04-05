@@ -19,6 +19,7 @@ model User {
   name         String
   password     String
   refreshTokens RefreshToken[]
+  files        UserFile[]
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
@@ -37,4 +38,20 @@ model RefreshToken {
   
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model UserFile {
+  id          String   @id @default(uuid())
+  fileName    String   @map("file_name")
+  originalName String  @map("original_name")
+  mimeType    String   @map("mime_type")
+  size        Int
+  url         String
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("user_files")
 }
