@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, UseInterceptors, UploadedFile, Request, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Post, UseGuards, UseInterceptors, UploadedFile, Request, Get, Delete, Param, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
@@ -7,7 +7,9 @@ import { Express } from 'express';
 
 @Controller('api/upload')
 export class UploadController {
-  constructor(private uploadService: UploadService) {}
+  constructor(
+    private uploadService: UploadService
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -39,5 +41,15 @@ export class UploadController {
     @Param('id') fileId: string,
   ) {
     return this.uploadService.deleteUserFile(req.user.id, fileId);
+  }
+
+  @Post(':id/ask')
+  @UseGuards(JwtAuthGuard)
+  async askUserFile(
+    @Request() req: { user: { id: string } },
+    @Param('id') fileId: string,
+    @Body() body: { question: string },
+  ) {
+    return this.uploadService.askAboutFile(req.user.id, fileId, body.question);
   }
 } 

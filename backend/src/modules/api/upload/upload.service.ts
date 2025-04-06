@@ -86,4 +86,23 @@ export class UploadService {
 
     return { message: 'Arquivo deletado com sucesso.' };
   }
+
+  async askAboutFile(userId: string, fileId: string, question: string): Promise<string | undefined | null> {
+    const file = await this.prisma.userFile.findUnique({
+      where: { id: fileId, userId: userId },
+      select: { text: true },
+    });
+
+    if (!file) {
+      throw new NotFoundException('Arquivo não encontrado ou pertence a outro usuário.');
+    }
+
+    if (!file.text) {
+      throw new NotFoundException('O texto deste arquivo ainda não foi processado ou a extração falhou.');
+    }
+
+    this.logger.log(`Enviando pergunta sobre fileId ${fileId} para o Gemini.`);
+    const response = await this.geminiService.askGemini(file.text, question);
+    return response;
+  }
 } 

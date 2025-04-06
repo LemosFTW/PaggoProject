@@ -7,12 +7,13 @@ import { S3Service } from './s3.service';
 export class GeminiService implements OnModuleInit {
   private genAI: GoogleGenAI;
   private readonly logger = new Logger(GeminiService.name);
+  private readonly modelName = 'gemini-1.5-flash';
 
   constructor(
     private configService: ConfigService,
     private s3Service: S3Service,
   ) {}
-
+  
   onModuleInit() {
     const apiKey = this.configService.getOrThrow<string>('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey }); 
@@ -27,7 +28,6 @@ export class GeminiService implements OnModuleInit {
         return null;
       }
 
-      const modelName = 'gemini-1.5-flash';
 
       const parts = [
         {
@@ -40,7 +40,7 @@ export class GeminiService implements OnModuleInit {
       ];
 
       const result = await this.genAI.models.generateContent({
-        model: modelName,
+        model: this.modelName,
         contents: [{ role: "user", parts }],
       });
 
@@ -79,6 +79,28 @@ export class GeminiService implements OnModuleInit {
     } catch (error) {
       this.logger.error(`Erro ao buscar arquivo do S3: ${error.message}`);
       return null;
+    }
+  }
+  public async askGemini(text: string, question: string): Promise<string | undefined> {
+    const prompt = 
+    `Você é um assistente de IA útil. Analise o texto a seguir e responda à pergunta. Texto:
+    ${text}
+    Pergunta: ${question}`;
+
+    try {
+      const result = await this.genAI.models.generateContent({
+        model: this.modelName,
+        contents: [{ role: "user", parts: [{ text: prompt }] }], 
+      });
+      
+      const response = result.text;
+      return response;
+    } catch (error) {
+        this.logger.error('Erro ao perguntar ao Gemini:', error);
+        if (error.response) {
+          this.logger.error('Detalhes da resposta do erro:', JSON.stringify(error.response, null, 2));
+        }
+        return undefined; 
     }
   }
 } 
