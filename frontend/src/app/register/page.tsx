@@ -1,9 +1,21 @@
 "use client";
 import axios from 'axios';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+
 export default function RegisterPage() {
+  useEffect(() => {
+    const access_token = localStorage.getItem('access_token');
+    const refresh_token = localStorage.getItem('refresh_token'); 
+    const userString = localStorage.getItem('user');
+
+    if (access_token && refresh_token && userString) {
+      router.push('/');
+      return;
+    }
+    })
+
   const router = useRouter();
   const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,14 +44,15 @@ export default function RegisterPage() {
       });
   };
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <input type="text" name="name" placeholder="Name" />
-        <input type="email" name="email" placeholder="Email" />
-        <input type="password" name="password" placeholder="Password" />
-        <button type="submit">Register</button>
+    <div className='flex flex-col items-center justify-center min-h-screen'>
+      <h1 className='text-2xl font-bold px-1 py-2'>Register</h1>
+      <form onSubmit={handleRegister} className='flex flex-col gap-2'>
+        <input type="text" name="name" placeholder="Name" className='p-2 m-2 rounded-md' />
+        <input type="email" name="email" placeholder="Email" className='p-2 m-2 rounded-md' />
+        <input type="password" name="password" placeholder="Password" className='p-2 m-2 rounded-md' />
+        <button type="submit" className='bg-blue-500 text-white p-2 m-2 rounded-md max-w-xs w-full'>Register</button>
       </form>
+      <span className='text-center'>Já tem conta? <a href="/login" className='text-blue-500'>Login</a></span>
     </div>
   );
 } 
