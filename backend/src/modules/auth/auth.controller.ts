@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, HttpCode, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -7,7 +7,6 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Request } from 'express';
 
-// Interface para o tipo de requisição com usuário
 interface RequestWithUser extends Request {
   user: { id: string; email: string };
 }
@@ -71,5 +70,24 @@ export class AuthController {
   })
   async logout(@Req() req: RequestWithUser, @Body() body: { refreshToken: string }) {
     return this.authService.logout(req.user.id, body.refreshToken);
+  }
+  @Get('validate-token')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Validar se o token de acesso ainda é válido' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token de acesso válido',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido ou expirado',
+  })
+  async validateToken(@Req() req: RequestWithUser) {
+    return {
+      isValid: true,
+      user: req.user,
+      message: 'Token válido'
+    };
   }
 }
