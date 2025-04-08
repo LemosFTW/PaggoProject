@@ -19,9 +19,7 @@ export function useAuth() {
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
-    if (typeof window !== 'undefined') {
-        router.push('/login');
-    }
+    router.push('/login');
   }, [router]);
 
   const checkAuthStatus = useCallback(() => {
@@ -41,14 +39,16 @@ export function useAuth() {
 
     } catch (error) {
         console.log("Verificação de Auth falhou:", (error as Error).message);
-        if (isAuthenticated) {
+        if (isAuthenticated) 
            logout();
-        } else {
+          else {
            setUser(null);
            setIsAuthenticated(false);
         }
     } finally {
         setIsLoading(false);
+        if (!isAuthenticated && !localStorage.getItem('access_token') )
+            router.push('/login');
     }
   }, [logout]);
 

@@ -2,19 +2,17 @@
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  
   useEffect(() => {
-    const access_token = localStorage.getItem('access_token');
-    const refresh_token = localStorage.getItem('refresh_token'); 
-    const userString = localStorage.getItem('user');
-
-    if (access_token && refresh_token && userString) {
+    if (isAuthenticated && !isLoading) {
       router.push('/');
-      return;
     }
-    })
+  }, [isAuthenticated, isLoading, router]);
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
