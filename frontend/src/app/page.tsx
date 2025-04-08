@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
 import { SuccessToast, ErrorToast } from '@/components/Toast';
 import { LoggedOutButton, UploadButton } from '@/components/Button';
+import jsPDF from 'jspdf';
+
 interface ToastData {
   id: number;
   message: string;
@@ -273,28 +275,61 @@ export default function Home() {
   const handleDownloadConversation = () => {
     if (!selectedFileForModal) return;
 
-    let conversationText = "--- CONVERSA ---\n\n";
+    const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const margin = 15;
+    const maxLineWidth = pageWidth - margin * 2;
+    let yPosition = margin;
+
+    const addWrappedText = (text: string, isBold = false) => {
+      if (isBold) {
+        doc.setFont("helvetica", "bold");
+      }
+
+      const lines = doc.splitTextToSize(text || "(Vazio)", maxLineWidth);
+
+      lines.forEach((line: string) => {
+        if (yPosition > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += 7;
+      });
+
+      if (isBold) {
+        doc.setFont("helvetica", "normal");
+      }
+      yPosition += 5;
+    };
+
+    doc.setFontSize(14);
+    addWrappedText("--- TEXTO ORIGINAL DO ARQUIVO ---", true);
+    doc.setFontSize(10);
+    addWrappedText(selectedFileForModal.text.replaceAll('/n', '\n') || "(Nenhum texto extraído)");
+
+    if (yPosition > pageHeight - margin - 30) {
+        doc.addPage();
+        yPosition = margin;
+    }
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    addWrappedText("--- CONVERSA ---", true);
+    doc.setFontSize(10);
+
     conversation.forEach((item, index) => {
-        conversationText += `[${index + 1}] Pergunta: ${item.question}\n`;
-        conversationText += `    Resposta: ${item.answer}\n\n`;
+      const questionText = `[${index + 1}] Pergunta: ${item.question}`;
+      const answerText = `    Resposta: ${item.answer}`;
+
+      addWrappedText(questionText, true);
+      addWrappedText(answerText);
+      yPosition += 3;
     });
 
-    const combinedText = `--- TEXTO ORIGINAL DO ARQUIVO ---\n\n${selectedFileForModal.text || "(Nenhum texto extraído)"}\n\n\n${conversationText}`;
-
-    const blob = new Blob([combinedText], { type: 'text/plain;charset=utf-8' });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
     const safeOriginalName = selectedFileForModal.originalName.replace(/[^a-z0-9_.-]/gi, '_');
-    link.download = `${safeOriginalName}_conversa.txt`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+    doc.save(`${safeOriginalName}_conversa.pdf`);
   };
 
   if (isAuthLoading) {
