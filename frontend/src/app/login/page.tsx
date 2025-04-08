@@ -48,7 +48,7 @@ export default function LoginPage() {
       <form onSubmit={handleLogin} className='flex flex-col gap-2'>
         <input type="email" name="email" placeholder="Email" className='p-2 m-2 rounded-md' />
         <input type="password" name="password" placeholder="Password" className='p-2 m-2 rounded-md' />
-        <button className='bg-blue-500 text-white p-2 m-2 rounded-md max-w-xs w-full' type="submit">Login</button>
+        <button className='bg-blue-500 text-white p-2 m-2 rounded-md max-w-xs w-full animate-pulse hover:animate-none cursor-pointer' type="submit">Login</button>
       </form>
         <span className='text-center'>Não tem conta? <a href="/register" className='text-blue-500'>Registre-se</a></span>
     </div>

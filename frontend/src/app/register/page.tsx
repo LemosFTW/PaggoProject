@@ -50,7 +50,7 @@ export default function RegisterPage() {
         <input type="text" name="name" placeholder="Name" className='p-2 m-2 rounded-md' />
         <input type="email" name="email" placeholder="Email" className='p-2 m-2 rounded-md' />
         <input type="password" name="password" placeholder="Password" className='p-2 m-2 rounded-md' />
-        <button type="submit" className='bg-blue-500 text-white p-2 m-2 rounded-md max-w-xs w-full'>Register</button>
+        <button type="submit" className='bg-blue-500 text-white p-2 m-2 rounded-md max-w-xs w-full animate-pulse hover:animate-none cursor-pointer'>Register</button>
       </form>
       <span className='text-center'>Já tem conta? <a href="/login" className='text-blue-500'>Login</a></span>
     </div>

@@ -4,6 +4,14 @@ import { useState, useEffect, useCallback, ChangeEvent, FormEvent } from 'react'
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import axios from 'axios';
+import { SuccessToast, ErrorToast } from '@/components/Toast';
+import { LoggedOutButton, UploadButton } from '@/components/Button';
+interface ToastData {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+  duration?: number;
+}
 
 interface FileData {
   id: string | number;
@@ -53,6 +61,8 @@ export default function Home() {
   const router = useRouter();
   const { user, isLoading: isAuthLoading, isAuthenticated, logout } = useAuth();
 
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+
   const [files, setFiles] = useState<FileData[]>([]);
   const [isLoadingFiles, setIsLoadingFiles] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +79,15 @@ export default function Home() {
   const [isAsking, setIsAsking] = useState<boolean>(false);
   const [askError, setAskError] = useState<string | null>(null);
 
+  const addToast = (message: string, type: 'success' | 'error', duration?: number) => {
+    const id = Date.now();
+    setToasts(prevToasts => [...prevToasts, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id));
+  };
+
   const fetchFiles = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -76,6 +95,7 @@ export default function Home() {
     if (!token) {
         console.error("Token não encontrado para fetchFiles");
         logout();
+        addToast('Token não encontrado. Faça login novamente.', 'error');
         return;
     }
 
@@ -92,9 +112,11 @@ export default function Home() {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
          console.error("Erro 401 ao buscar arquivos. Deslogando.");
          logout();
+         addToast('Erro 401: Sessão expirada. Faça login novamente.', 'error');
       } else {
          console.error("Erro ao buscar arquivos:", err);
          setError('Falha ao carregar a lista de arquivos.');
+         addToast('Falha ao carregar a lista de arquivos.', 'error');
       }
     } finally {
       setIsLoadingFiles(false);
@@ -123,12 +145,14 @@ export default function Home() {
     event.preventDefault();
     if (!selectedFile) {
       setUploadError("Por favor, selecione um arquivo.");
+      addToast('Por favor, selecione um arquivo.', 'error');
       return;
     }
 
     const token = localStorage.getItem('access_token');
     if (!token) {
       setUploadError("Erro de autenticação. Por favor, faça login novamente.");
+      addToast('Erro de autenticação. Por favor, faça login novamente.', 'error');
       logout();
       return;
     }
@@ -149,17 +173,21 @@ export default function Home() {
       setIsModalOpen(false);
       setSelectedFile(null);
       await fetchFiles();
-
+      addToast('Arquivo enviado com sucesso.', 'success');
     } catch (err: any) {
         console.error("Erro no upload:", err);
+        let errorMessage = 'Falha no upload do arquivo. Verifique sua conexão.';
         if (axios.isAxiosError(err) && err.response?.status === 401) {
-            setUploadError("Sessão expirada. Faça login novamente.");
+            errorMessage = "Sessão expirada. Faça login novamente.";
+            setUploadError(errorMessage);
             logout();
         } else if (axios.isAxiosError(err) && err.response) {
-            setUploadError(err.response.data?.message || 'Falha no upload do arquivo.');
+            errorMessage = err.response.data?.message || 'Falha no upload do arquivo.';
+            setUploadError(errorMessage);
          } else {
-            setUploadError('Falha no upload do arquivo. Verifique sua conexão.');
+            setUploadError(errorMessage);
          }
+         addToast(errorMessage, 'error');
     } finally {
       setIsUploading(false);
     }
@@ -193,6 +221,7 @@ export default function Home() {
      if (!token) {
          setAskError("Erro de autenticação. Faça login novamente.");
          logout();
+         addToast('Erro de autenticação. Faça login novamente.', 'error');
          return;
      }
 
@@ -208,22 +237,27 @@ export default function Home() {
          );
          console.log('resposta recebida:', response.data);
          const answerString = response.data;
-         
+         addToast('Resposta recebida com sucesso.', 'success');
 
          setConversation(prev => [...prev, { question: questionToSend, answer: answerString }]);
          setCurrentQuestion("");
 
      } catch (err: any) {
          console.error("Erro ao perguntar:", err);
+         let askErrorMessage = 'Erro de comunicação com o servidor ao enviar pergunta.';
          if (axios.isAxiosError(err) && err.response?.status === 401) {
-             setAskError("Sessão expirada ou inválida. Faça login novamente.");
+             askErrorMessage = "Sessão expirada ou inválida. Faça login novamente.";
+             setAskError(askErrorMessage);
              logout();
          } else if (axios.isAxiosError(err) && err.response) {
              const apiErrorMessage = err.response.data?.message || err.response.data?.error;
-             setAskError(apiErrorMessage || `Erro ao processar pergunta: ${err.response.statusText}`);
+             askErrorMessage = apiErrorMessage || `Erro ao processar pergunta: ${err.response.statusText}`;
+             setAskError(askErrorMessage);
          } else {
-             setAskError('Erro de comunicação com o servidor ao enviar pergunta.');
+             setAskError(askErrorMessage);
          }
+         addToast(askErrorMessage, 'error');
+
      } finally {
          setIsAsking(false);
      }
@@ -265,17 +299,39 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white relative">
+       <div className="fixed top-4 right-4 z-[100] space-y-2 w-80">
+         {toasts.map((toast) => (
+            toast.type === 'success' ? (
+              <SuccessToast
+                key={toast.id}
+                id={toast.id}
+                message={toast.message}
+                duration={toast.duration}
+                onClose={removeToast}
+              />
+            ) : (
+              <ErrorToast
+                key={toast.id}
+                id={toast.id}
+                message={toast.message}
+                duration={toast.duration}
+                onClose={removeToast}
+              />
+            )
+         ))}
+       </div>
+
        <div className="flex items-center p-4 border-b border-gray-700">
            <h1 className="text-xl font-bold">Armazenamento de Arquivos</h1>
            <div className="flex items-center ml-auto gap-4">
                <p className="text-base font-semibold">Bem-vindo, {user?.name || 'Usuário'}!</p>
-               <button
+               <LoggedOutButton
                     onClick={logout}
                     className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition duration-150 ease-in-out"
                >
                    Logout
-               </button>
+               </LoggedOutButton>
            </div>
        </div>
 
@@ -286,7 +342,7 @@ export default function Home() {
          {!isLoadingFiles && files.length > 0 ? (
             <div className="w-full max-w-2xl mb-8">
               {files.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-3 mb-3 bg-gray-800 rounded-md border border-gray-700 hover:bg-gray-700 transition duration-150 ease-in-out"
+                <div key={file.id} className="flex items-center justify-between p-3 mb-3 bg-gray-800 rounded-md border border-gray-700 hover:bg-gray-700 transition duration-150 ease-in-out cursor-pointer"
                   onClick={() => handleFileClick(file)}
                 >
                   <div className="flex-1 mr-4 overflow-hidden">
@@ -306,13 +362,13 @@ export default function Home() {
           )}
 
          <div className="flex flex-col sm:flex-row gap-4">
-            <button
+            <UploadButton
                 onClick={handleUploadClick}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out"
                 disabled={isUploading}
             >
                 Fazer Upload de Novo Arquivo
-            </button>
+            </UploadButton>
           </div>
        </div>
 
@@ -382,7 +438,13 @@ export default function Home() {
                          <div>
                             <h3 className="text-lg font-semibold text-gray-300 mb-2">Texto Extraído:</h3>
                             <pre className="bg-gray-900 p-3 rounded text-sm text-gray-200 whitespace-pre-wrap break-words max-h-60 overflow-y-auto border border-gray-700">
-                                {selectedFileForModal.text.replaceAll('/n', '\n') || <span className="text-gray-500 italic">Nenhum texto extraído disponível.</span>}
+                                {selectedFileForModal.text ? selectedFileForModal.text.replaceAll('/n', '\n') : (
+                                  (() => {
+                                    addToast('Nenhum texto extraído disponível para este arquivo.', 'error');
+                                    handleCloseDetailModal();
+                                    return null;
+                                  })()
+                                )}
                             </pre>
                         </div>
 
