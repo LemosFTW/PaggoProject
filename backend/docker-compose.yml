@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: paggo-api
+    ports:
+      - "3000:3000"
+    environment:
+    depends_on:
+      - db
+    command: >
+      sh -c "echo 'Waiting for database...' &&
+             sleep 5 && # Pequena pausa para garantir que o DB esteja pronto
+             echo 'Running migrations...' &&
+             npx prisma migrate deploy && 
+             echo 'Starting application...' &&
+             node dist/src/main" # Ajuste para dist/main se o build for corrigido
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine 
+    container_name: paggo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata:
