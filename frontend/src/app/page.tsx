@@ -162,6 +162,13 @@ export default function Home() {
     const formData = new FormData();
     formData.append('file', selectedFile);
 
+    if (selectedFile.type !== 'application/pdf' && selectedFile.type !== 'image/png' && selectedFile.type !== 'image/jpeg') {
+      setUploadError("O arquivo deve ser PDF, PNG ou JPG.");
+      addToast('O arquivo deve ser PDF, PNG ou JPG.', 'error');
+      setIsUploading(false);
+      return;
+    }
+
     try {
       await axios.post('http://localhost:3000/api/upload', formData, {
         headers: {
