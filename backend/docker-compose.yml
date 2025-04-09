@@ -9,6 +9,18 @@ services:
     ports:
       - "3000:3000"
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres 
+      PORT: 3000
+      NODE_ENV: production
+      JWT_SECRET: UUID
+      JWT_EXPIRES_IN: 3600
+      JWT_REFRESH_SECRET: UUID
+      JWT_REFRESH_EXPIRES_IN: 604800
+      AWS_ACCESS_KEY_ID: UUID
+      AWS_SECRET_ACCESS_KEY: UUID
+      AWS_REGION: UUID
+      AWS_BUCKET_NAME: UUID
+      GEMINI_API_KEY : UUID
     depends_on:
       - db
     command: >

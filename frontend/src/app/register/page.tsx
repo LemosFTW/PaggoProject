@@ -3,8 +3,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SuccessToast, ErrorToast } from '@/components/Toast';
+import { API_BASE_URL } from '@/config/enviroment';
 
-// Interface para o estado dos toasts
 interface ToastData {
   id: number;
   message: string;
@@ -43,7 +43,7 @@ export default function RegisterPage() {
       email: formData.get('email'),
       password: formData.get('password'),
     }
-    axios.post('http://localhost:3000/auth/register', payload)
+    axios.post(`${API_BASE_URL}/auth/register`, payload)
       .then(response => {
         console.log('Registro bem-sucedido:', response.data);
         addToast('Registro bem-sucedido!', 'success');

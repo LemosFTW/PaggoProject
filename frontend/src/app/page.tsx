@@ -7,7 +7,7 @@ import axios from 'axios';
 import { SuccessToast, ErrorToast } from '@/components/Toast';
 import { LoggedOutButton, UploadButton } from '@/components/Button';
 import jsPDF from 'jspdf';
-
+import { API_BASE_URL } from '@/config/enviroment';
 interface ToastData {
   id: number;
   message: string;
@@ -104,7 +104,7 @@ export default function Home() {
     setIsLoadingFiles(true);
     setError(null);
     try {
-      const response = await axios.get<FileData[]>('http://localhost:3000/api/upload', {
+      const response = await axios.get<FileData[]>(`${API_BASE_URL}/api/upload`, {
         headers: {
           'Authorization': `Bearer ${token}`}
       });
@@ -172,7 +172,7 @@ export default function Home() {
     }
 
     try {
-      await axios.post('http://localhost:3000/api/upload', formData, {
+      await axios.post(`${API_BASE_URL}/api/upload`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -240,7 +240,7 @@ export default function Home() {
 
      try {
          const response = await axios.post<string>(
-             `http://localhost:3000/api/upload/${selectedFileForModal.id}/ask`,
+             `${API_BASE_URL}/api/upload/${selectedFileForModal.id}/ask`,
              { question: questionToSend },
              { headers: { 'Authorization': `Bearer ${token}` } }
          );

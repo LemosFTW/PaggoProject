@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SuccessToast, ErrorToast } from '@/components/Toast';
+import { API_BASE_URL } from '@/config/enviroment';
 
 interface ToastData {
   id: number;
@@ -39,7 +40,7 @@ export default function LoginPage() {
       email: formData.get('email'),
       password: formData.get('password'),
     }
-    axios.post('http://localhost:3000/auth/login', payload)
+    axios.post(`${API_BASE_URL}/auth/login`, payload)
       .then(response => {
           console.log('Registro bem-sucedido:', response.data);
           addToast('Login bem-sucedido', 'success');
