@@ -39,3 +39,8 @@ docker run -it NOME-IMAGEM
 ### FRONTEND
 
 `frontend/src/app/tests`
+
+# Melhorias Futuras
++ Https e escalabilidade com o uso do Elastic Beanstalk e Balance Loader da aws.
++ Robustez nos Testes do BackEnd.
++ Aprimoramento e detalhamento da documentação do backend.
