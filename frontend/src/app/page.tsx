@@ -482,7 +482,7 @@ export default function Home() {
                             <pre className="bg-gray-900 p-3 rounded text-sm text-gray-200 whitespace-pre-wrap break-words max-h-60 overflow-y-auto border border-gray-700">
                                 {selectedFileForModal.text ? selectedFileForModal.text.replaceAll('/n', '\n') : (
                                   (() => {
-                                    addToast('Nenhum texto extraído disponível para este arquivo.', 'error');
+                                    addToast('Nenhum texto extraído disponível para este arquivo. Se for um novo upload AGUARDE e RECARREGUE A PAGINA', 'error');
                                     handleCloseDetailModal();
                                     return null;
                                   })()
