@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/api/upload/upload.module';
 import { envValidationSchema } from './config/env.validation';
+import { UsersModule } from './modules/api/users/users.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { envValidationSchema } from './config/env.validation';
     }),
     AuthModule,
     UploadModule,
+    UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],

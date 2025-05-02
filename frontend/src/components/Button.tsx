@@ -29,3 +29,11 @@ export const UploadButton = ({ children, className, ...props }: ButtonProps) => 
     </DefaultButton>
   );
 };
+
+export const PrimaryButton = ({ children, className, ...props }: ButtonProps) => {
+  return (
+    <DefaultButton className={`bg-blue-500 text-white p-2 rounded ${className}`} {...props}>
+      {children}
+    </DefaultButton>
+  );
+}
