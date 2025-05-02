@@ -1,26 +1,19 @@
 "use client"
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { SuccessToast, ErrorToast } from '@/components/Toast';
-import { API_BASE_URL } from '@/config/enviroment';
 import {PrimaryButton} from '@/components/Button';
 
 
 export default function AdminPage(){
     const router = useRouter();
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, logout } = useAuth();
     useEffect(() => {
-        // const user = localStorage.getItem('user');
-        // if (user) {
-        //     const parsedUser = JSON.parse(user);
-        //     if (parsedUser.role !== 'admin') {
-        //         router.push('/');
-        //     }
-        // } else 
-        //     router.push('/');
-    }, []);
+        if (!isAuthenticated && !isLoading) 
+            logout();
+        //TODO block access to non-admin users
+        
+    }, [isAuthenticated, isLoading, router]);
 
     return(
         <div className="flex flex-col items-center justify-center min-h-screen py-8"> 

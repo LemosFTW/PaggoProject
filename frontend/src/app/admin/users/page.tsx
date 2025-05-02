@@ -8,15 +8,15 @@ import { useEffect, useState } from "react";
 
 export default function UsersPage(){
     const router = useRouter();
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, logout } = useAuth();
     const [users, setUsers] = useState<any[]>([]);
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (!token) { 
+        if (!isAuthenticated && !isLoading) 
             router.push('/login');
-            return; 
-        }
+        //TODO block access to non-admin users
+        var token = localStorage.getItem('access_token');
         
+        //this is already blocked to only admin users by the backend
         axios.get(`${API_BASE_URL}/api/users`, {
                 headers: {
                   'Authorization': `Bearer ${token}`
@@ -27,9 +27,10 @@ export default function UsersPage(){
               })
               .catch(error => {
                   console.error("Error fetching users:", error);
+                  logout();
               });
 
-    }, []); 
+    }, [isAuthenticated, isLoading, router]); 
 
     return(
     <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4 bg-black text-white"> 
