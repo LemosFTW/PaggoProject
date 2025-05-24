@@ -33,7 +33,7 @@ export default function UsersPage(){
     }, [isAuthenticated, isLoading, router]); 
 
     return(
-    <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4 bg-black text-white"> 
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4 bg-gray-900 text-white"> 
         <h1 className="text-2xl font-bold mb-6 text-white">Lista de Usuários</h1>
         {isLoading ? (
             <p className="text-white">Carregando...</p>
@@ -45,6 +45,7 @@ export default function UsersPage(){
                             <th className="py-3 px-4 border-b border-gray-700 text-left text-sm font-semibold text-gray-300">Nome</th>
                             <th className="py-3 px-4 border-b border-gray-700 text-left text-sm font-semibold text-gray-300">Email</th>
                             <th className="py-3 px-4 border-b border-gray-700 text-left text-sm font-semibold text-gray-300">Role</th>
+                            <th className="py-3 px-4 border-b border-gray-700 text-left text-sm font-semibold text-gray-300">Files</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,6 +54,7 @@ export default function UsersPage(){
                                 <td className="py-3 px-4 border-b border-gray-700 text-sm text-gray-200">{user.name}</td>
                                 <td className="py-3 px-4 border-b border-gray-700 text-sm text-gray-200">{user.email}</td>
                                 <td className="py-3 px-4 border-b border-gray-700 text-sm text-gray-200">{user.role}</td>
+                                <td className="py-3 px-4 border-b border-gray-700 text-sm text-gray-200"> {user.files.length}</td>
                             </tr>
                         ))}    
                     </tbody>

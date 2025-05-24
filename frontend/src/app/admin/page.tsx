@@ -16,7 +16,7 @@ export default function AdminPage(){
     }, [isAuthenticated, isLoading, router]);
 
     return(
-        <div className="flex flex-col items-center justify-center min-h-screen py-8"> 
+        <div className="flex flex-col items-center justify-center bg-gray-900 min-h-screen py-8"> 
             <div className='text-center text-xl mb-4'>
                 Bem vindo a pagina destinada a Administradores
             </div>
