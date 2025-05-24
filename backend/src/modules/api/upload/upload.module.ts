@@ -13,5 +13,6 @@ import { PrismaService } from '../../../prisma/prisma.service';
     GeminiService,
     PrismaService,
   ],
+  exports: [UploadService],
 })
 export class UploadModule {} 
